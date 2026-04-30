@@ -1,0 +1,95 @@
+trigger:
+  - main
+  - develop
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build Stage
+    jobs:
+      - job: BuildJob
+        displayName: Build and Test
+        steps:
+          - task: Maven@4
+            displayName: Maven Build
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean package'
+              options: '-DskipTests=false'
+              publishJUnitResults: true
+              testResultsFiles: '**/TEST-*.xml'
+              javaHomeSelection: 'JDKVersion'
+              jdkVersionOption: '17'
+
+  - stage: BuildDocker
+    displayName: Build Docker Image
+    jobs:
+      - job: DockerJob
+        displayName: Build and Push Docker
+        steps:
+          - task: Docker@2
+            displayName: Build Docker Image
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: 'ibkteam/smp-random-code-service'
+              command: 'build'
+              dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              tags: |
+                $(Build.BuildNumber)
+                latest
+
+  - stage: DeployDev
+    displayName: Deploy to Development
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployDev
+        environment: 'dev'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Deploying to Development..."
+                    helm upgrade --install smp-random-code-service ./helm \
+                      --namespace randomcode \
+                      --values ./values-dev.yml \
+                      --set image.tag=$(Build.BuildNumber)
+                  displayName: Helm Deploy Dev
+
+  - stage: DeployUat
+    displayName: Deploy to UAT
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployUat
+        environment: 'uat'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Deploying to UAT..."
+                    helm upgrade --install smp-random-code-service ./helm \
+                      --namespace randomcode-uat \
+                      --values ./values-uat.yml
+                  displayName: Helm Deploy UAT
+
+  - stage: DeployPrd
+    displayName: Deploy to Production
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployPrd
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Deploying to Production..."
+                    helm upgrade --install smp-random-code-service ./helm \
+                      --namespace randomcode-prd \
+                      --values ./values-prd.yml
+                  displayName: Helm Deploy Production
