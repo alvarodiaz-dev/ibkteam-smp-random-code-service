@@ -1,0 +1,13 @@
+# CD Profile - no mocks, uses environment variables
+common:
+  mocks: ${MOCKS:}
+  profile: cd
+
+static:
+  code-generation-timeout: ${CODE_GENERATION_TIMEOUT:5000}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
