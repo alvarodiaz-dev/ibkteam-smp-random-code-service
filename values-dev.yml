@@ -1,0 +1,27 @@
+# Development Environment Values
+replicaCount: 1
+
+image:
+  repository: registry.example.com/ibkteam/smp-random-code-service
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+env:
+  PROFILE: ci
+  MOCKS: mock
+  LOG_LEVEL: DEBUG
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
