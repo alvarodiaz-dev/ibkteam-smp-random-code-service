@@ -1,0 +1,7 @@
+# CI Profile - activates all mocks
+common:
+  mocks: mock
+  profile: ci
+
+static:
+  code-generation-timeout: 5000
