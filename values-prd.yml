@@ -1,0 +1,47 @@
+# Production Environment Values
+replicaCount: 2
+
+image:
+  repository: registry.example.com/ibkteam/smp-random-code-service
+  tag: "1.0.0"
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: randomcode-api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: randomcode-api-tls
+      hosts:
+        - randomcode-api.example.com
+
+env:
+  PROFILE: cd
+  MOCKS: ""
+  LOG_LEVEL: INFO
+  SPRINGDOC_API_DOCS_ENABLED: false
+  SPRINGDOC_SWAGGER_UI_ENABLED: false
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
