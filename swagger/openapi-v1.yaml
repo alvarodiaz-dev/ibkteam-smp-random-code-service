@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  title: Random Code Generation Service API
+  description: |
+    Microservicio simple para generación de códigos aleatorios de 4 dígitos.
+  version: "1.0.0"
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+
+tags:
+  - name: codes
+    description: Operaciones de generación de códigos
+  - name: health
+    description: Endpoints de monitoreo y salud del servicio
+
+paths:
+  /api/v1/codes:
+    get:
+      summary: Generar código aleatorio de 4 dígitos
+      operationId: generateCode
+      tags:
+        - codes
+      responses:
+        '200':
+          description: Código generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeResponse'
+        '500':
+          description: Error interno del servidor
+
+  /api/v1/codes/generate:
+    post:
+      summary: Generar código (POST alternativo)
+      operationId: generateCodePost
+      tags:
+        - codes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCodeRequest'
+      responses:
+        '200':
+          description: Código generado exitosamente
+        '400':
+          description: Solicitud inválida
+
+  /health:
+    get:
+      summary: Verificar estado del servicio
+      operationId: healthCheck
+      tags:
+        - health
+      responses:
+        '200':
+          description: Servicio saludable
+        '503':
+          description: Servicio no disponible
+
+components:
+  schemas:
+    CodeResponse:
+      type: object
+      required:
+        - code
+        - timestamp
+        - requestId
+      properties:
+        code:
+          type: string
+          description: Código aleatorio de 4 dígitos
+          pattern: '^[0-9]{4}$'
+          example: "4827"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp ISO 8601 de generación
+          example: "2025-01-15T10:30:45.123Z"
+        requestId:
+          type: string
+          description: Identificador único de la solicitud
+          example: "req-a1b2c3d4-e5f6"
+
+    GenerateCodeRequest:
+      type: object
+      properties:
+        includeTimestamp:
+          type: boolean
+          description: Incluir timestamp en respuesta
+          default: true
+        format:
+          type: string
+          description: Formato del código
+          enum: [plain, json]
+          default: plain
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - timestamp
+        - requestId
+      properties:
+        error:
+          type: string
+          description: Tipo de error
+        message:
+          type: string
+          description: Mensaje descriptivo del error
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - service
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+          description: Estado del servicio
+        timestamp:
+          type: string
+          format: date-time
+        service:
+          type: string
+        version:
+          type: string
+        error:
+          type: string
