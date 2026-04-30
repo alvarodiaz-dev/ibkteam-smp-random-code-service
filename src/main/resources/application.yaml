@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: smp-randomcode-service
+  profiles:
+    active: ${PROFILE:cd}
+    group:
+      dev: ci
+      uat: cd
+      prd: cd
+      test: ci
+
+server:
+  port: 8080
+
+common:
+  profile: ${PROFILE:ci}
+  mocks: ${MOCKS:}
+
+static:
+  code-generation-timeout: 5000
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    pe.interbank.smp: ${LOG_LEVEL:INFO}
