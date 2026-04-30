@@ -1,0 +1,21 @@
+# Helm Chart for Random Code Service
+
+apiVersion: v2
+name: smp-random-code-service
+description: A Helm chart for Random Code Generation Service
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - interbank
+  - smp
+  - random-code
+  - microservice
+
+maintainers:
+  - name: Interbank SMP Team
+    email: smp@interbank.pe
+
+sources:
+  - https://github.com/interbank/ibkteam-smp-random-code-service
